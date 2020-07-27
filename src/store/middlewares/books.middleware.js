@@ -1,16 +1,26 @@
-import Axios from 'axios';
-import { API_REQUEST, apiError, apiSuccess } from '../actions/api.action';
+import { BOOKS, FETCH_BOOKS, setBooks } from '../actions/books.action';
+import { API_ERROR, API_SUCCESS, apiRequest } from '../actions/api.action';
+import { setLoader } from '../actions/ui.action';
+import { setNotification } from '../actions/notification.action';
 
+const BOOKS_URL = 'https://www.googleapis.com/books/v1/volumes?q=redux';
 
-export const apiMiddleware = ({dispatch}) => next => action => {
+export default () => next => action => {
     next(action);
-
-    if(action.type.includes(API_REQUEST)){
-        const { body, url, method, feature } = action.meta;
-
-        Axios({url, method, data: body})
-            .then( res => dispatch(apiSuccess({response, feature})))
-            .catch( err => dispatch(apiError({error, feature})))
-    
+    switch(action.type){
+        case FETCH_BOOKS:
+            next(apiRequest({body: null, method: 'GET', url: BOOKS_URL, feature: BOOKS}));
+            next(setLoader({state: true, feature: BOOKS}));
+            break;
+        case `${BOOKS} ${API_SUCCESS}`:
+            next(setBooks({books: action.payload.items}));
+            next(setLoader({state: false, feature: BOOKS}));
+            break;
+        case `${BOOKS} ${API_ERROR}`:
+            next(setNotification({message: action.payload, feature: BOOKS}))
+            next(setLoader({state: false, feature: BOOKS}))
+            break;
+        default:
+            break;
     }
-};
+}

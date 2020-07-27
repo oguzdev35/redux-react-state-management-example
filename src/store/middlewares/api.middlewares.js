@@ -1,11 +1,15 @@
-import { BOOKS, FETCH_BOOKS, setBooks } from '../actions/books.action';
-import { API_ERROR, API_SUCCESS, apiRequest } from '../actions/api.action';
-import { setLoader } from '../actions/ui.action';
-import { setNotification } from '../actions/notification.action';
+import Axios from 'axios';
+import { API_REQUEST, apiError, apiSuccess } from '../actions/api.action';
 
-const BOOKS_URL = 'https://www.googleapis.com/books/v1/volumes?q=redux';
 
-export const booksMiddleware = () => next => action => {
+export default ({dispatch}) => next => action => {
     next(action);
-    switch(action.type)
-}
+
+    if(action.type.includes(API_REQUEST)){
+        const { body, url, method, feature } = action.meta;
+
+        Axios({url, method, data: body})
+            .then( ({data}) => dispatch(apiSuccess({response: data, feature})))
+            .catch( error => dispatch(apiError({error, feature})))
+    }
+};
