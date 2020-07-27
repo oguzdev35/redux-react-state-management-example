@@ -4,13 +4,17 @@ import booksMiddleware from './middlewares/books.middleware';
 import apiMiddleware from './middlewares/api.middleware';
 import normalizeMiddleware from './middlewares/normalize.middleware';
 import notificationMiddleware from './middlewares/notification.middleware';
+import loggerMiddleware from './middlewares/logger.middleware';
+import actionSplitterMiddleware from './middlewares/actionSplitter.middleware';
 import uiReducer from './reducers/ui.reducer';
 import notificationReducer from './reducers/notification.reducer';
+import undoableEnhancer from './enhancers/undoable.enhancer';
+import stateFreezerEnhancer from './enhancers/stateFreezer.enhancer';
 import DevTools from '../ui/DevTools';
 
 // shape the state structure
 const rootReducer = combineReducers({
-    books: booksReducer,
+    books: undoableEnhancer(booksReducer),
     ui: uiReducer,
     notification: notificationReducer
 })
@@ -22,9 +26,11 @@ const featureMiddleware = [
 
 // create the core middleware
 const coreMiddleware = [
+    actionSplitterMiddleware,
     apiMiddleware,
     normalizeMiddleware,
-    notificationMiddleware
+    notificationMiddleware,
+    loggerMiddleware
 ]
 
 const enhancer = compose(
@@ -32,4 +38,8 @@ const enhancer = compose(
     DevTools.instrument()
 );
 
-export default createStore( rootReducer, {}, enhancer)
+export default createStore( 
+    stateFreezerEnhancer(rootReducer),
+    {}, 
+    enhancer
+)
