@@ -3,7 +3,7 @@ import { API_ERROR, API_SUCCESS, apiRequest } from '../actions/api.action';
 import { setLoader } from '../actions/ui.action';
 import { setNotification } from '../actions/notification.action';
 
-const BOOKS_URL = 'https://www.googleapis.com/books/v1/volumes?q=redux';
+const BOOKS_URL = 'https://sdwww.googleapis.com/books/v1/volumes?q=redux';
 
 export default () => next => action => {
     next(action);
@@ -13,7 +13,7 @@ export default () => next => action => {
             next(setLoader({state: true, feature: BOOKS}));
             break;
         case `${BOOKS} ${API_SUCCESS}`:
-            next(setBooks({books: action.payload.items}));
+            next(setBooks({books: action.payload.items, normalizeKey: 'id'}));
             next(setLoader({state: false, feature: BOOKS}));
             break;
         case `${BOOKS} ${API_ERROR}`:

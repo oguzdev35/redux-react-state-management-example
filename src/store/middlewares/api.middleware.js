@@ -9,7 +9,8 @@ export default ({dispatch}) => next => action => {
         const { body, url, method, feature } = action.meta;
 
         Axios({url, method, data: body})
-            .then( ({data}) => dispatch(apiSuccess({response: data, feature})))
+            .then( ({data}) => data)
+            .then( response => dispatch(apiSuccess({response, feature})))
             .catch( error => dispatch(apiError({error, feature})))
     }
 };
